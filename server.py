@@ -2,6 +2,21 @@ import argparse
 import sys
 import socket
 import struct
+import threading
+
+
+class ConnectionThread(threading.Thread):
+    """
+    A Thread that receives a message from a connection and prints it.
+    """
+    def __init__(self, conn):
+        super().__init__()
+        self.conn = conn
+    
+    def run(self):
+        message_len, = struct.unpack('<I', recv_all(self.conn, 4))
+        message = recv_all(self.conn, message_len).decode()
+        print("Got message:", message)
 
 
 def recv_all(sock, bufsize, flags=0):
@@ -24,9 +39,7 @@ def run_server(ip, port):
         print("Press ^C to exit.")
         while True:
             conn, addr = server.accept()
-            message_len, = struct.unpack('<I', recv_all(conn, 4))
-            message = recv_all(conn, message_len).decode()
-            print("Got message:", message)
+            ConnectionThread(conn).start()
         
 
 
@@ -41,7 +54,7 @@ def get_args():
 
 def main():
     '''
-    Implementation of CLI and sending data to server.
+    Implementation of CLI and setting up server.
     '''
     args = get_args()
     try:
