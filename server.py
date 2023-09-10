@@ -4,6 +4,10 @@ import socket
 import struct
 import threading
 
+import time
+
+from listener import Listener
+
 
 class ConnectionThread(threading.Thread):
     """
@@ -14,31 +18,18 @@ class ConnectionThread(threading.Thread):
         self.conn = conn
     
     def run(self):
-        message_len, = struct.unpack('<I', recv_all(self.conn, 4))
-        message = recv_all(self.conn, message_len).decode()
-        print("Got message:", message)
-
-
-def recv_all(sock, bufsize, flags=0):
-    """Receive data from the socket.
-    The return value is a bytes object representing the data received.
-    The amount of data received is exactly bufsize.
-    """
-    result = b''
-    while (length_diff := bufsize - len(result)) > 0:
-        result += sock.recv(length_diff, flags)
-    return result
+        with self.conn:
+            message = self.conn.receive_message()
+        print("Got message:", message.decode())
 
 
 def run_server(ip, port):
     """Setup a server in address (ip, port) and receive data."""
-    with socket.socket() as server:
-        server.bind((ip, port))
-        server.listen(5)
+    with Listener(port, ip) as listener:
         print(f"Listening to messages on ip: {ip} and port: {port}")
         print("Press ^C to exit.")
         while True:
-            conn, addr = server.accept()
+            conn = listener.accept()
             ConnectionThread(conn).start()
         
 
