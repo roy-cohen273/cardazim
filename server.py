@@ -2,31 +2,33 @@ import argparse
 import sys
 import socket
 import struct
+import threading
+
+from listener import Listener
 
 
-def recv_all(sock, bufsize, flags=0):
-    """Receive data from the socket.
-    The return value is a bytes object representing the data received.
-    The amount of data received is exactly bufsize.
+class ConnectionThread(threading.Thread):
     """
-    result = b''
-    while (length_diff := bufsize - len(result)) > 0:
-        result += sock.recv(length_diff, flags)
-    return result
+    A Thread that receives a message from a connection and prints it.
+    """
+    def __init__(self, conn):
+        super().__init__()
+        self.conn = conn
+    
+    def run(self):
+        with self.conn:
+            message = self.conn.receive_message()
+        print("Got message:", message.decode())
 
 
 def run_server(ip, port):
     """Setup a server in address (ip, port) and receive data."""
-    with socket.socket() as server:
-        server.bind((ip, port))
-        server.listen(5)
+    with Listener(port, ip) as listener:
         print(f"Listening to messages on ip: {ip} and port: {port}")
         print("Press ^C to exit.")
         while True:
-            conn, addr = server.accept()
-            message_len, = struct.unpack('<I', recv_all(conn, 4))
-            message = recv_all(conn, message_len).decode()
-            print("Got message:", message)
+            conn = listener.accept()
+            ConnectionThread(conn).start()
         
 
 
@@ -41,7 +43,7 @@ def get_args():
 
 def main():
     '''
-    Implementation of CLI and sending data to server.
+    Implementation of CLI and setting up server.
     '''
     args = get_args()
     try:

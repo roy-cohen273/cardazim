@@ -3,6 +3,8 @@ import sys
 import socket
 import struct
 
+from connection import Connection
+
 
 ###########################################################
 ####################### YOUR CODE #########################
@@ -14,12 +16,8 @@ def send_data(server_ip, server_port, data):
     Send data to server in address (server_ip, server_port).
     '''
     data = data.encode()
-    data_len = len(data)
-    data_len = struct.pack('<I', data_len)
-    with socket.socket() as client:
-        client.connect((server_ip, server_port))
-        client.sendall(data_len)
-        client.sendall(data)
+    with Connection.connect(server_ip, server_port) as connection:
+        connection.send_message(data)
         
 
 ###########################################################
