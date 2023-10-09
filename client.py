@@ -5,6 +5,8 @@ import struct
 
 from connection import Connection
 
+from card import Card
+
 
 ###########################################################
 ####################### YOUR CODE #########################
@@ -15,7 +17,6 @@ def send_data(server_ip, server_port, data):
     '''
     Send data to server in address (server_ip, server_port).
     '''
-    data = data.encode()
     with Connection.connect(server_ip, server_port) as connection:
         connection.send_message(data)
         
@@ -26,13 +27,21 @@ def send_data(server_ip, server_port, data):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description='Send data to server.')
+    parser = argparse.ArgumentParser(description='Send a card to a server.')
     parser.add_argument('server_ip', type=str,
                         help='the server\'s ip')
     parser.add_argument('server_port', type=int,
                         help='the server\'s port')
-    parser.add_argument('data', type=str,
-                        help='the data')
+    parser.add_argument('name', type=str,
+                        help='the name of the card')
+    parser.add_argument('creator', type=str,
+                        help='the creator of the card')
+    parser.add_argument('riddle', type=str,
+                        help='the riddle of the card')
+    parser.add_argument('solution', type=str,
+                        help='the solution to the riddle')
+    parser.add_argument('image_file', type=argparse.FileType('rb'),
+                        help='the file of the image on the card')
     return parser.parse_args()
 
 
@@ -42,7 +51,10 @@ def main():
     '''
     args = get_args()
     try:
-        send_data(args.server_ip, args.server_port, args.data)
+        card = Card.create_from_path(args.name, args.creator, args.image_file, args.riddle, args.solution)
+        print(f"Sending card {card.name!r} by {card.creator}...")
+        card.image.encrypt(card.solution.encode())
+        send_data(args.server_ip, args.server_port, card.serialize())
         print('Done.')
     except Exception as error:
         print(f'ERROR: {error}')

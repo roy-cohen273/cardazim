@@ -6,6 +6,8 @@ import threading
 
 from listener import Listener
 
+from card import Card
+
 
 class ConnectionThread(threading.Thread):
     """
@@ -18,7 +20,8 @@ class ConnectionThread(threading.Thread):
     def run(self):
         with self.conn:
             message = self.conn.receive_message()
-        print("Got message:", message.decode())
+        card = Card.deserialize(message)
+        print(f"Received card {card.name!r} by {card.creator}")
 
 
 def run_server(ip, port):
