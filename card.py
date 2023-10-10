@@ -2,7 +2,7 @@ from typing import Optional
 import struct
 
 from crypt_image import CryptImage
-from serialization import serialize_string, deserialize_string
+from serialization import serialize_string, deserialize_string, assert_deserialization_finished
 
 
 class Card:
@@ -45,5 +45,6 @@ class Card:
         creator = deserialize_string(buf)
         image = CryptImage.deserialize(buf)
         riddle = deserialize_string(buf)
+        assert_deserialization_finished(buf)
         return cls(name, creator, image, riddle, None)
 
