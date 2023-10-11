@@ -29,16 +29,12 @@ class CryptImage:
     @property
     def image_data(self) -> bytes:
         """Get raw image data as a bytes object"""
-        # itertools.chain.from_terable is used to flatten the image data
-        return bytes(itertools.chain.from_iterable(self.image.getdata()))
+        return self.image.tobytes()
 
     @image_data.setter
     def image_data(self, data: bytes):
         """Set the raw image data."""
-        # iterate encrypted_data in 3-tuples
-        it = iter(data)
-        image_data = [(r, g, b) for r, g, b in zip(it, it, it)]
-        self.image.putdata(image_data)
+        self.image.frombytes(data)
 
     def encrypt(self, key: bytes):
         """Encrypt the image using the given key."""
