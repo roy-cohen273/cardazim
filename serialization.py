@@ -3,7 +3,7 @@
 import struct
 
 
-def take(buf: bytearray, length: int) -> bytearray:
+def extract_and_remove_prefix(buf: bytearray, length: int) -> bytearray:
     """Take the first `length` bytes from `buf` and remove them from `buf`."""
     if len(buf) < length:
         raise ValueError('Not enough data')
@@ -17,7 +17,7 @@ def serialize_int(buf: bytearray, i: int):
 
 def deserialize_int(buf: bytearray) -> int:
     """Deserialize an int from an uint32 in little endian and remove it from the buffer."""
-    i, = struct.unpack('<I', take(buf, 4))
+    i, = struct.unpack('<I', extract_and_remove_prefix(buf, 4))
     return i
 
 def serialize_bytes(buf: bytearray, data: bytes):
@@ -28,7 +28,7 @@ def serialize_bytes(buf: bytearray, data: bytes):
 def deserialize_bytes(buf: bytearray) -> bytes:
     """Deserialize a bytes object and remove it from the buffer."""
     i = deserialize_int(buf)
-    return bytes(take(buf, i))
+    return bytes(extract_and_remove_prefix(buf, i))
 
 def serialize_string(buf: bytearray, s: str) -> bytes:
     """Serialize a string and append it to the buffer."""

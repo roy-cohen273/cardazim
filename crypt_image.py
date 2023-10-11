@@ -5,7 +5,7 @@ import itertools
 from PIL import Image
 from Crypto.Cipher import AES
 
-from serialization import serialize_int, deserialize_int, assert_deserialization_finished, take
+from serialization import serialize_int, deserialize_int, assert_deserialization_finished, extract_and_remove_prefix
 
 
 class CryptImage:
@@ -83,10 +83,10 @@ class CryptImage:
         height = deserialize_int(buf)
         width = deserialize_int(buf)
 
-        image_data = take(buf, height * width * 3)
+        image_data = extract_and_remove_prefix(buf, height * width * 3)
         image = Image.frombytes('RGB', (width, height), image_data)
 
-        key_hash = take(buf, 32)
+        key_hash = extract_and_remove_prefix(buf, 32)
         if key_hash == b'\x00' * 32:
             key_hash = None
 
