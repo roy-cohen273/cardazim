@@ -53,7 +53,7 @@ def main():
     try:
         card = Card.create_from_path(args.name, args.creator, args.image_file, args.riddle, args.solution)
         print(f"Sending card {card.name!r} by {card.creator}...")
-        card.image.encrypt(card.solution.encode())
+        card.encrypt()
         send_data(args.server_ip, args.server_port, card.serialize())
         print('Done.')
     except Exception as error:

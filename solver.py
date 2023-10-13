@@ -2,78 +2,55 @@
 
 '''
 This is a script that runs a solver for your cards.
-To run it just run in cmd `solver.py`.
-Feel free to change it however you like.
-Add your code in the marked sections.
-Without your code it doesn't really do anything.
-(You can run it before adding your code just to see what happens...)
+To run it just run in cmd `solver.py`
 
 We used npyscreen to write the interactive cli.
 To read about npyscreen see documentation here:
 https://npyscreen.readthedocs.io/index.html#
-
-Final notes:
-We assume your cards have name, creator and riddle attributes
-(card.name, card.creator and card.riddle should work).
-If they don't, you might have to change this script a little.
-Also:
-Currently this script doesn't receive any arguments,
-but you might have to add some (like the directory of your cards or something).
-But you already know how to do that, so...
-Good Luck!
 '''
 
+import sys
+import argparse
+from pathlib import Path
+from typing import List, Tuple
+
 import npyscreen
-# add your imports here!
+
+from card import Card
+from saver import Saver
+
+from utils import check_directory
 
 
 CARD_STR = 'Card {card.name} by {card.creator}'
 
-#####################################################################
-####################### DELETE THIS SECTION #########################
-#####################################################################
-
-
-class ExampleCard:
-    def __init__(self, name, creator, riddle):
-        self.name = name
-        self.creator = creator
-        self.riddle = riddle
-
-
-EXAMPLE_CARDS = [ExampleCard(name=str(n),
-                             creator='Me',
-                             riddle='Some riddle')
-                 for n in range(1, 25)]
-
-
-#####################################################################
-#####################################################################
-#####################################################################
-
 
 class ChooseCardsForm(npyscreen.ActionForm):
 
-    ###########################################################
-    ####################### YOUR CODE #########################
-    ###########################################################
+    def get_card_by_path(self, path: Path) -> Card:
+        """Deserializes and returns the card stored in the given path."""
+        if not path.is_file():
+            raise Exception(f"The unsolved cards directory contains somthing that isn;t a file: '{path}'")
+        try:
+            return Card.deserialize(path.read_bytes())
+        except Exception as error:
+            raise Exception(f"Error while trying to deserialize: '{path}'\n{error}") from error
 
-    def get_cards(self):
-        '''
-        returns list of unsolved cards.
-        replace this method with your own code
-        (read files from memory etc.)
-        '''
-        return EXAMPLE_CARDS
+    def get_card_string_by_path(self, path: Path) -> Card:
+        """Returns the card string of the card stored in the given path."""
+        return CARD_STR.format(card=self.get_card_by_path(path))
 
-    ###########################################################
-    ##################### END OF YOUR CODE ####################
-    ###########################################################
+    def get_cards(self) -> List[Tuple[str, str]]:
+        """Returns a list of (card_id, card_str) tuples."""
+        return [
+            (path.name, self.get_card_string_by_path(path))
+            for path in self.parentApp.unsolved_cards_dir.iterdir()
+        ]
+
 
     def create(self):
         self.cards = self.get_cards()
-        self.cards_strs = [CARD_STR.format(card=card)
-                           for card in self.cards]
+        cards_strs = [card_str for card_id, card_str in self.cards]
         self.add(npyscreen.FixedText,
                  value='Welcome to your cards solver!',
                  editable=False,
@@ -86,13 +63,16 @@ class ChooseCardsForm(npyscreen.ActionForm):
         self.card = self.add(npyscreen.TitleSelectOne,
                              name='Pick a card. any card. '
                                   '[press cancel to exit]',
-                             values=self.cards_strs,
+                             values=cards_strs,
                              exit_right=True,
                              labelColor='DEFAULT')
 
     def on_ok(self):
         if self.card.value:
-            self.parentApp.card = self.cards[self.card.value[0]]
+            card_id, card_str = self.cards[self.card.value[0]]
+            card_path = self.parentApp.unsolved_cards_dir / card_id
+            self.parentApp.card = self.get_card_by_path(card_path)
+            self.parentApp.unsolved_card_path = card_path
             self.parentApp.setNextForm('SolveCard')
         else:
             self.parentApp.setNextForm('MAIN')
@@ -103,18 +83,13 @@ class ChooseCardsForm(npyscreen.ActionForm):
 
 class SolveCardForm(npyscreen.Form):
 
-    ###########################################################
-    ####################### YOUR CODE #########################
-    ###########################################################
-
-    def check_solution(self, card, solution):
+    def check_solution(self, card: Card, solution: str):
         '''
         checks if soltion is correct (returns True or False)
-        replace this with your own code.
         '''
-        return solution != 'wrong solution'
+        return card.solve(solution)
 
-    def handle_correct_solution(self, card, solution):
+    def handle_correct_solution(self, card: Card, solution: str):
         '''
         this function handles a correct solution
         replace this with your own code.
@@ -123,9 +98,9 @@ class SolveCardForm(npyscreen.Form):
         print(f'{CARD_STR.format(card=card)} was solved correctly!')
         print(f'The solution was: {solution}')
 
-    ###########################################################
-    ##################### END OF YOUR CODE ####################
-    ###########################################################
+        self.parentApp.unsolved_card_path.unlink()
+        self.parentApp.unsolved_card_path = None
+        self.parentApp.saver.save(card, dir_path=self.parentApp.solved_cards_dir)
 
     def solve(self, card, solution):
         if self.check_solution(card, solution):
@@ -161,6 +136,9 @@ class RightSolutionForm(npyscreen.Form):
         self.add(npyscreen.Textfield,
                  value=f'press ok to solve another card :)',
                  editable=False)
+        self.add(npyscreen.ButtonPress,
+                 name='see image',
+                 when_pressed_function=self.parentApp.card.image.show)
 
     def afterEditing(self):
         self.parentApp.card = None
@@ -188,7 +166,13 @@ class WrongSolutionForm(npyscreen.ActionForm):
 
 
 class InteractiveCLI(npyscreen.NPSAppManaged):
-    card = None
+    def __init__(self, unsolved_cards_dir: Path, solved_cards_dir: Path):
+        super().__init__()
+        self.card = None
+        self.unsolved_card_path = None
+        self.saver = Saver()
+        self.unsolved_cards_dir = unsolved_cards_dir
+        self.solved_cards_dir = solved_cards_dir
 
     def onStart(self):
         self.addFormClass('MAIN',
@@ -205,5 +189,26 @@ class InteractiveCLI(npyscreen.NPSAppManaged):
                           name='Cards Solver')
 
 
+def get_args():
+    parser = argparse.ArgumentParser(description='Present unsolved cards to the user and try to solve them.')
+    parser.add_argument('unsolved_cards_dir', type=Path,
+                        help='The directory to read unsolved cards from')
+    parser.add_argument('solved_cards_dir', type=Path,
+                        help='The directory to save solved cards to')
+    return parser.parse_args()
+
+
+def main():
+    args = get_args()
+    try:
+        if check_directory(args.unsolved_cards_dir) and check_directory(args.solved_cards_dir):
+            InteractiveCLI(args.unsolved_cards_dir, args.solved_cards_dir).run()
+        else:
+            return 1
+    except Exception as error:
+        print(f'ERROR: {error}')
+        return 1
+
+
 if __name__ == "__main__":
-    App = InteractiveCLI().run()
+    sys.exit(main())

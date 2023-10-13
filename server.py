@@ -8,16 +8,8 @@ from connection import Connection
 
 from card import Card
 
+from utils import check_directory
 
-def check_unsolved_cards_dir(unsolved_cards_dir: Path) -> bool:
-    """Check that the unsolved cards directory is valid."""
-    if not unsolved_cards_dir.exists():
-        print(f"Directory does not exist: '{unsolved_cards_dir}'")
-        return False
-    if not unsolved_cards_dir.is_dir():
-        print(f"Not a directory: '{unsolved_cards_dir}'")
-        return False
-    return True
 
 def run_server(ip: str, port: int, unsolved_cards_dir: Path):
     """Setup a server in address (ip, port), receive cards, and save them to the unsolved cards directory."""
@@ -61,7 +53,7 @@ def main():
     '''
     args = get_args()
     try:
-        if check_unsolved_cards_dir(args.unsolved_cards_dir):
+        if check_directory(args.unsolved_cards_dir):
             run_server(args.server_ip, args.server_port, args.unsolved_cards_dir)
         else:
             return 1
