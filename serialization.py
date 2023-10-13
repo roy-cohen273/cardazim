@@ -12,7 +12,7 @@ def extract_and_remove_prefix(buf: bytearray, length: int) -> bytearray:
     return result
 
 def serialize_int(buf: bytearray, i: int):
-    """Serialize an int as an uint32 in little endian and append it t= o the buffer."""
+    """Serialize an int as an uint32 in little endian and append it to the buffer."""
     buf.extend(struct.pack('<I', i))
 
 def deserialize_int(buf: bytearray) -> int:
@@ -30,7 +30,7 @@ def deserialize_bytes(buf: bytearray) -> bytes:
     i = deserialize_int(buf)
     return bytes(extract_and_remove_prefix(buf, i))
 
-def serialize_string(buf: bytearray, s: str, must_be_printable: bool = True) -> bytes:
+def serialize_string(buf: bytearray, s: str, must_be_printable: bool = True):
     """Serialize a string and append it to the buffer."""
     if must_be_printable and not s.isprintable():
         raise ValueError(f"Trying to serialize non-printable string: {s!r}")
