@@ -30,7 +30,7 @@ class ChooseCardsForm(npyscreen.ActionForm):
     def get_card_by_path(self, path: Path) -> Card:
         """Deserializes and returns the card stored in the given path."""
         if not path.is_file():
-            raise Exception(f"The unsolved cards directory contains somthing that isn;t a file: '{path}'")
+            raise Exception(f"The unsolved cards directory contains somthing that isn't a file: '{path}'")
         try:
             return Card.deserialize(path.read_bytes())
         except Exception as error:

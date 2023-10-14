@@ -13,12 +13,12 @@ from utils import check_directory
 
 def run_server(ip: str, port: int, unsolved_cards_dir: Path):
     """Setup a server in address (ip, port), receive cards, and save them to the unsolved cards directory."""
-    card_id = 0
+    card_id = max_card_id(unsolved_cards_dir)
     with Listener(port, ip) as listener:
         print(f"Listening to messages on ip: {ip} and port: {port}")
         print("Press ^C to exit.")
         while True:
-            card_id = next_card_id(unsolved_cards_dir, card_id)
+            card_id += 1
             conn = listener.accept()
             Thread(target=handle_connection, args=(conn, unsolved_cards_dir, card_id)).start()
 
@@ -31,11 +31,11 @@ def handle_connection(conn: Connection, unsolved_cards_dir: Path, card_id: int):
     card_path.write_bytes(message)
     print(f"Saved card to path '{card_path}'.")
         
-def next_card_id(unsolved_cards_dir: Path, card_id: int) -> int:
-    """Return the next available card id."""
-    while (unsolved_cards_dir / str(card_id)).exists():
-        card_id += 1
-    return card_id
+def max_card_id(unsolved_cards_dir: Path) -> int:
+    """Returns the largest card id in the given directory.
+    Returns -1 if the directory is empty.
+    """
+    return max((int(path.name) for path in unsolved_cards_dir.iterdir() if path.name.isnumeric()), default=-1)
 
 def get_args():
     parser = argparse.ArgumentParser(description='Setup a server, receive cards, and save them to file.')
