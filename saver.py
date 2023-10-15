@@ -37,7 +37,7 @@ class Saver:
             raise ValueError(f"Cannot save card due to invalid creator: {card.creator!r}")
 
         card_path = creator_path / card.name
-        if not is_parent(card_name, creator_path):
+        if not is_parent(card_path, creator_path):
             raise ValueError(f"Cannot save card due to invalid name: {card.name!r}")
         
         card_path.mkdir(parents=True, exist_ok=True)
