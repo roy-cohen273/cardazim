@@ -5,7 +5,7 @@ import itertools
 from PIL import Image
 from Crypto.Cipher import AES
 
-from serialization import serialize_int, deserialize_int
+from serialization import serialize_int, deserialize_int, assert_deserialization_finished, extract_and_remove_prefix
 
 
 class CryptImage:
@@ -68,21 +68,21 @@ class CryptImage:
         When deserializing from a bytearray, the data is read from the begining of the bytearray
         and then deleted from it.
         """
-        if isinstance(data, bytearray):
-            buf = data
-        else:
+        if not isinstance(data, bytearray):
             buf = bytearray(data)
+            result = cls.deserialize(buf)
+            assert_deserialization_finished(buf)
+            return result
+        
+        buf = data
 
         height = deserialize_int(buf)
         width = deserialize_int(buf)
 
-        image_data_length = height * width * 3
-        image_data = buf[:image_data_length]
+        image_data = extract_and_remove_prefix(buf, height * width * 3)
         image = Image.frombytes('RGB', (width, height), image_data)
-        del buf[:image_data_length]
 
-        key_hash = buf[:32]
-        del buf[:32]
+        key_hash = extract_and_remove_prefix(buf, 32)
         if key_hash == b'\x00' * 32:
             key_hash = None
 
