@@ -10,3 +10,8 @@ def check_directory(directory: Path) -> bool:
         print(f"Not a directory: '{directory}'")
         return False
     return True
+
+
+def is_parent(child: Path, parent: Path) -> bool:
+    """Returns whether `parent` is the parent of `child`, after resolving the two paths."""
+    return child.resolve().parent == parent.resolve()
