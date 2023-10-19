@@ -91,13 +91,9 @@ class SolveCardForm(npyscreen.Form):
 
     def handle_correct_solution(self, card: Card, solution: str):
         '''
-        this function handles a correct solution
-        replace this with your own code.
-        (move card to solved card etc.)
+        this function handles a correct solution.
+        It moves the card from the unsolved cards directory to the solved cards directory.
         '''
-        print(f'{CARD_STR.format(card=card)} was solved correctly!')
-        print(f'The solution was: {solution}')
-
         self.parentApp.unsolved_card_path.unlink()
         self.parentApp.unsolved_card_path = None
         self.parentApp.saver.save(card, dir_path=self.parentApp.solved_cards_dir)
@@ -136,6 +132,7 @@ class RightSolutionForm(npyscreen.Form):
         self.add(npyscreen.Textfield,
                  value=f'press ok to solve another card :)',
                  editable=False)
+        self.nextrely += 1
         self.add(npyscreen.ButtonPress,
                  name='see image',
                  when_pressed_function=self.parentApp.card.image.show)
