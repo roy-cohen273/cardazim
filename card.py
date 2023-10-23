@@ -49,7 +49,7 @@ class Card:
         return cls(name, creator, image, riddle, None)
 
     def encrypt(self):
-        """Encypt the card's image using its solution."""
+        """Encrypt the card's image using its solution."""
         self.image.encrypt(self.solution.encode())
 
     def solve(self, solution: str) -> bool:
