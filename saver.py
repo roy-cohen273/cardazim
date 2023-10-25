@@ -23,7 +23,7 @@ class Saver:
         with metadata_path.open('w') as f:
             json.dump(metadata, f)
 
-        card.image.image.save(image_path)
+        card.image.save_image(image_path)
 
     def get_card_path(self, card: Card, dir_path='.') -> Path:
         """Get the path to save the card in."""

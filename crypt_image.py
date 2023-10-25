@@ -36,6 +36,11 @@ class CryptImage:
         """Set the raw image data."""
         self.image.frombytes(data)
 
+    def save_image(self, path):
+        """Save the image (without metadata) to a given path."""
+        self.image.save(path)
+
+
     def encrypt(self, key: bytes):
         """Encrypt the image using the given key."""
         first_hash = hashlib.sha256(key).digest()
