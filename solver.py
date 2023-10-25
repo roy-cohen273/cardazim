@@ -96,7 +96,7 @@ class SolveCardForm(npyscreen.Form):
         '''
         self.parentApp.unsolved_card_path.unlink()
         self.parentApp.unsolved_card_path = None
-        self.parentApp.saver.save(card, dir_path=self.parentApp.solved_cards_dir)
+        self.parentApp.saver.save(card)
 
     def solve(self, card, solution):
         if self.check_solution(card, solution):
@@ -167,9 +167,8 @@ class InteractiveCLI(npyscreen.NPSAppManaged):
         super().__init__()
         self.card = None
         self.unsolved_card_path = None
-        self.saver = Saver()
+        self.saver = Saver(solved_cards_dir)
         self.unsolved_cards_dir = unsolved_cards_dir
-        self.solved_cards_dir = solved_cards_dir
 
     def onStart(self):
         self.addFormClass('MAIN',
