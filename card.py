@@ -48,3 +48,16 @@ class Card:
         assert_deserialization_finished(buf)
         return cls(name, creator, image, riddle, None)
 
+    def encrypt_image(self):
+        """Encrypt the card's image using its solution."""
+        self.image.encrypt(self.solution.encode())
+
+    def solve(self, solution: str) -> bool:
+        """Attempt to solve the card using the given solution.
+        Returns whether this was successful.
+        """
+        if self.image.decrypt(solution.encode()):
+            self.solution = solution
+            return True
+        return False
+
