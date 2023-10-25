@@ -10,6 +10,7 @@ class Saver:
     def save(self, card: Card, dir_path='.'):
         """Save a given card to a given path."""
         card_path = self.get_card_path(card, dir_path)
+        card_path.mkdir(parents=True, exist_ok=True)
         metadata_path = card_path / "metadata.json"
         image_path = card_path / "image.jpg"
 
@@ -40,5 +41,4 @@ class Saver:
         if not is_parent(card_path, creator_path):
             raise ValueError(f"Cannot save card due to invalid name: {card.name!r}")
         
-        card_path.mkdir(parents=True, exist_ok=True)
         return card_path
