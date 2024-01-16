@@ -29,3 +29,7 @@ def test_client(server_ip, server_port, name, creator, riddle, solution, image_f
 	assert card.creator == creator
 	assert card.riddle == riddle
 	assert card.solution is None
+
+	# test the solution and the image
+	assert card.solve(solution)
+	# TODO: test if the file contents are the same
