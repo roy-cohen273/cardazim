@@ -2,6 +2,8 @@ import pytest
 import sys
 import struct
 
+from PIL import Image
+
 from .write_only_socket_mock import WriteOnlySocketMock
 
 import client
@@ -29,7 +31,9 @@ def test_client(server_ip, server_port, name, creator, riddle, solution, image_f
 	assert card.creator == creator
 	assert card.riddle == riddle
 	assert card.solution is None
+	assert card.image.key_hash is not None  # the image is encrypted
 
 	# test the solution and the image
 	assert card.solve(solution)
-	# TODO: test if the file contents are the same
+	assert card.image.key_hash is None  # the image is not encrypted
+	assert card.image.image_data == Image.open(image_file).tobytes()
