@@ -2,6 +2,7 @@ import argparse
 import sys
 from threading import Thread
 from pathlib import Path
+from typing import List
 
 from listener import Listener
 from connection import Connection
@@ -11,7 +12,7 @@ from card import Card
 from utils import check_directory
 
 
-def run_server(ip: str, port: int, unsolved_cards_dir: Path):
+def run_server(ip: str, port: int, unsolved_cards_dir: Path, threads: List[Thread]):
     """Setup a server in address (ip, port), receive cards, and save them to the unsolved cards directory."""
     card_id = max_card_id(unsolved_cards_dir)
     with Listener(port, ip) as listener:
@@ -20,7 +21,9 @@ def run_server(ip: str, port: int, unsolved_cards_dir: Path):
         while True:
             card_id += 1
             conn = listener.accept()
-            Thread(target=handle_connection, args=(conn, unsolved_cards_dir, card_id)).start()
+            thread = Thread(target=handle_connection, args=(conn, unsolved_cards_dir, card_id))
+            threads.append(thread)
+            thread.start()
 
 def handle_connection(conn: Connection, unsolved_cards_dir: Path, card_id: int):
     """Handle a connection by receiving a card and saving it to the unsolved cards directory."""
@@ -52,16 +55,21 @@ def main():
     Implementation of CLI and setting up server.
     '''
     args = get_args()
+    threads = []
     try:
         if check_directory(args.unsolved_cards_dir):
-            run_server(args.server_ip, args.server_port, args.unsolved_cards_dir)
+            run_server(args.server_ip, args.server_port, args.unsolved_cards_dir, threads)
         else:
             return 1
     except KeyboardInterrupt:
         print('\nDone.')
     except Exception as error:
-        print(f'ERROR: {error}')
+        print(f'ERROR: {error}', file=sys.stderr)
         return 1
+    finally:
+        # don't exit before all the threads finish
+        for thread in threads:
+            thread.join()
 
 
 if __name__ == '__main__':
