@@ -1,4 +1,5 @@
 class WriteOnlySocketMock:
+	"""A mock object to replace a socket. With the added condition that it is write-only."""
 	data = None
 	addr = None
 

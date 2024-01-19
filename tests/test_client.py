@@ -1,13 +1,10 @@
 import pytest
 import sys
-import struct
-
-from PIL import Image
 
 from .write_only_socket_mock import WriteOnlySocketMock
+from .utils import assert_card
 
 import client
-from card import Card
 
 
 @pytest.mark.parametrize('server_ip, server_port, name, creator, riddle, solution, image_file', [
@@ -18,23 +15,6 @@ def test_client(server_ip, server_port, name, creator, riddle, solution, image_f
 	sys.argv[1:] = [server_ip, str(server_port), name, creator, riddle, solution, image_file]
 	client.main()
 
-	# test the message protocol
-	data = WriteOnlySocketMock.data
-	assert len(data) >= 4
-	length, = struct.unpack('<I', data[:4])
-	data = data[4:]
-	assert length == len(data)
-
-	# test message data
-	card = Card.deserialize(data)
 	assert WriteOnlySocketMock.addr == (server_ip, server_port)
-	assert card.name == name
-	assert card.creator == creator
-	assert card.riddle == riddle
-	assert card.solution is None
-	assert card.image.key_hash is not None  # the image is encrypted
 
-	# test the solution and the image
-	assert card.solve(solution)
-	assert card.image.key_hash is None  # the image is not encrypted
-	assert card.image.image_data == Image.open(image_file).tobytes()
+	assert_card(WriteOnlySocketMock.data, name, creator, riddle, solution, image_file, is_solved=False)
