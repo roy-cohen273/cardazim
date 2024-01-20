@@ -6,7 +6,9 @@ class Driver(ABC):
 
 	@abstractmethod
 	def insert_file(self):
-		"""Create a new file. Returns a tuple of the file's id and an open file object (in 'wb' mode)."""
+		"""Create a new file. Returns a tuple of the file's id and an open file object (in 'wb' mode).
+		It is the responsibility of the caller to close the returned file object.
+		"""
 		raise NotImplementedError
 
 	@abstractmethod
