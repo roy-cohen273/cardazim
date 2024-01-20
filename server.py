@@ -8,12 +8,12 @@ from connection import Connection
 
 from card import Card
 
-from utils import check_directory
+from utils import check_directory, max_directory_id
 
 
 def run_server(ip: str, port: int, unsolved_cards_dir: Path):
     """Setup a server in address (ip, port), receive cards, and save them to the unsolved cards directory."""
-    card_id = max_card_id(unsolved_cards_dir)
+    card_id = max_directory_id(unsolved_cards_dir)
     with Listener(port, ip) as listener:
         print(f"Listening to messages on ip: {ip} and port: {port}")
         print("Press ^C to exit.")
@@ -30,12 +30,6 @@ def handle_connection(conn: Connection, unsolved_cards_dir: Path, card_id: int):
     card_path = unsolved_cards_dir / str(card_id)
     card_path.write_bytes(message)
     print(f"Saved card to path '{card_path}'.")
-        
-def max_card_id(unsolved_cards_dir: Path) -> int:
-    """Returns the largest card id in the given directory.
-    Returns -1 if the directory is empty.
-    """
-    return max((int(path.name) for path in unsolved_cards_dir.iterdir() if path.name.isnumeric()), default=-1)
 
 def get_args():
     parser = argparse.ArgumentParser(description='Setup a server, receive cards, and save them to file.')
