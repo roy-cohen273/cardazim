@@ -2,15 +2,17 @@ import json
 from pathlib import Path
 
 from driver import Driver
-from utils import max_directory_id
+from utils import max_directory_id, check_directory
 
 
-class FSDriver(Driver):
+class FSDriver(Driver, url_scheme='filesystem'):
 	FILES_SUBDIRECTORY = 'files'
 	OBJECTS_SUBDIRECTORY = 'objects'
 
-	def __init__(self, directory_path: str):
-		directory_path = Path(directory_path)
+	def __init__(self, url: str):
+		directory_path = Path(url.split('://', 1)[1])
+		if not check_directory(directory_path):
+			raise ValueError()
 		self.files_directory = directory_path / type(self).FILES_SUBDIRECTORY
 		self.objects_directory = directory_path / type(self).OBJECTS_SUBDIRECTORY
 

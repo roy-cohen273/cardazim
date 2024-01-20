@@ -4,9 +4,9 @@ from gridfs import GridFS
 from driver import Driver
 
 
-class MongoDBDriver(Driver):
-	def __init__(self, host, port, database_name):
-		client = MongoClient(host, port)
+class MongoDBDriver(Driver, url_scheme='mongodb'):
+	def __init__(self, url, database_name='default_db'):
+		client = MongoClient(url)
 		db = client[database_name]
 		self.objects_collection = client[database_name].objects
 		self.gridfs = GridFS(db)

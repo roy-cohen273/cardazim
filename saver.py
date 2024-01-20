@@ -1,6 +1,6 @@
 from card import Card
-from fs_driver import FSDriver
-from mongodb_driver import MongoDBDriver
+from driver import Driver
+import all_drivers
 
 
 class Saver:
@@ -8,10 +8,7 @@ class Saver:
 
     def __init__(self, url: str):
         """Initialize a new Saver with a given url to save in."""
-        # TODO: parse `url` and determine the driver.
-        #       for now, it is hardcoded.
-        # self.driver = FSDriver(url)
-        self.driver = MongoDBDriver('localhost', 27017, 'test_db')
+        self.driver = Driver.get_driver(url)
 
     def save(self, card: Card):
         """Save a given card."""
