@@ -5,10 +5,10 @@ from driver import Driver
 
 
 class MongoDBDriver(Driver, url_scheme='mongodb'):
-	def __init__(self, url, database_name='default_db'):
+	def __init__(self, url):
 		client = MongoClient(url)
-		db = client[database_name]
-		self.objects_collection = client[database_name].objects
+		db = client.get_default_database(default='default_db')
+		self.objects_collection = db.objects
 		self.gridfs = GridFS(db)
 
 	def insert_file(self):
