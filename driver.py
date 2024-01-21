@@ -37,3 +37,22 @@ class Driver(ABC):
 	def insert_object(self, obj):
 		"""Insert the given object. Returns the object's id."""
 		raise NotImplementedError
+
+	@abstractmethod
+	def find_objects(self, filter: dict):
+		"""Find all objects that pass the given filter.
+		The filter is a dictionary of key-value pairs that the objects must have.
+		Returns an iterable of the objects.
+		"""
+		raise NotImplementedError
+
+	@abstractmethod
+	def find_one_object(self, filter: dict):
+		"""Find a single object that passes the given filter.
+		The filter is a dictionary of key-value pairs that the object must have.
+		If more than one object passes the filter, one of them is returned,
+		if no object passes the filter, None is returned.
+		"""
+		for obj in self.find_objects(filter):
+			return obj
+		return None
