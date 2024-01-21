@@ -32,3 +32,16 @@ class FSDriver(Driver, url_scheme='filesystem'):
 		with (self.objects_directory / str(self.object_id)).open('w') as f:
 			json.dump(obj, f)
 		return self.object_id
+
+	def iter_objects(self):
+		for obj_path in self.objects_directory.iterdir():
+			with obj_path.open('rb') as f:
+				obj = json.load(f)
+			yield obj
+
+	def get_file(self, file_id):
+		file_path = self.files_directory / str(file_id)
+		if file_path.exists():
+			return file_path.open('rb')
+		else:
+			return None
