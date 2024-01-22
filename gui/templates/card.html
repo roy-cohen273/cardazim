@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
+{% block breadcrumb %}
+	<li class="breadcrumb-item"><a href="/creators/">Creators</a></li>
+	<li class="breadcrumb-item"><a href="/creators/{{ card['creator'] }}/cards/">{{ card['creator'] }}'s Cards</a></li>
+	<li class="breadcrumb-item active">"{{ card['name'] }}" by {{ card['creator'] }}</li>
+{% endblock %}
 {% block content %}
 	<h1>"{{ card['name'] }}" by {{ card['creator'] }}</h1>
 	<p>
