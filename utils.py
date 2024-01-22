@@ -12,6 +12,8 @@ def check_directory(directory: Path) -> bool:
     return True
 
 
-def is_parent(child: Path, parent: Path) -> bool:
-    """Returns whether `parent` is the parent of `child`, after resolving the two paths."""
-    return child.resolve().parent == parent.resolve()
+def max_directory_id(directory: Path):
+    """Returns the largest id in the given directory.
+    Returns -1 if the directory is empty.
+    """
+    return max((int(path.name) for path in directory.iterdir() if path.name.isnumeric()), default=-1)

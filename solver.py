@@ -163,11 +163,11 @@ class WrongSolutionForm(npyscreen.ActionForm):
 
 
 class InteractiveCLI(npyscreen.NPSAppManaged):
-    def __init__(self, unsolved_cards_dir: Path, solved_cards_dir: Path):
+    def __init__(self, unsolved_cards_dir: Path, solved_cards_url: str):
         super().__init__()
         self.card = None
         self.unsolved_card_path = None
-        self.saver = Saver(solved_cards_dir)
+        self.saver = Saver(solved_cards_url)
         self.unsolved_cards_dir = unsolved_cards_dir
 
     def onStart(self):
@@ -189,16 +189,16 @@ def get_args():
     parser = argparse.ArgumentParser(description='Present unsolved cards to the user and try to solve them.')
     parser.add_argument('unsolved_cards_dir', type=Path,
                         help='The directory to read unsolved cards from')
-    parser.add_argument('solved_cards_dir', type=Path,
-                        help='The directory to save solved cards to')
+    parser.add_argument('solved_cards_url', type=str,
+                        help='The URL to save solved cards to')
     return parser.parse_args()
 
 
 def main():
     args = get_args()
     try:
-        if check_directory(args.unsolved_cards_dir) and check_directory(args.solved_cards_dir):
-            InteractiveCLI(args.unsolved_cards_dir, args.solved_cards_dir).run()
+        if check_directory(args.unsolved_cards_dir):
+            InteractiveCLI(args.unsolved_cards_dir, args.solved_cards_url).run()
         else:
             return 1
     except Exception as error:
