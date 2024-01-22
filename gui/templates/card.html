@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+	<h1>"{{ card['name'] }}" by {{ card['creator'] }}</h1>
+	<p>
+		<b>riddle: </b> {{ card['riddle'] }}
+	</p>
+	<p>
+		<b>solution: </b> {{ card['solution'] }}
+	</p>
+	<img src="/creators/{{ card['creator'] }}/cards/{{ card['name'] }}/image.jpg" class="center" />
+{% endblock %}

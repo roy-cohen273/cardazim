@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+	<h1>Creators</h1>
+	<ul>
+		{% for creator in creators %}
+			<li key="{{ creator }}">
+				<a href="/creators/{{ creator }}/cards/">
+					{{ creator }}
+				</a>
+			</li>
+		{% endfor %}
+	</ul>
+{% endblock %}
