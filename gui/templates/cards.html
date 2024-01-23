@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block breadcrumb %}
+	<li class="breadcrumb-item"><a href="/creators/">Creators</a></li>
+	<li class="breadcrumb-item active">{{ creator }}'s Cards</li>
+{% endblock %}
+{% block content %}
+	<h1>{{ creator }}'s Cards</h1>
+	<div class="list-group">
+		{% for card in cards %}
+			<a href="/creators/{{ creator }}/cards/{{ card }}" class="list-group-item">
+				{{ card }}
+			</a>
+		{% endfor %}
+	</div>
+{% endblock %}
